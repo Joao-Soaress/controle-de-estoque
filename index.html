@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Controle de Estoque</title>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            flex-direction: column;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        input {
+            margin-top: 50px;
+        }
+
+        .modal-content button {
+            margin-top: 50px;
+            margin-left: 50px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            height: 550px;
+            border: 1px solid #888;
+            width: 80%;
+            display: block;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .con {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button img {
+            width: 20px;
+            text-align: center;
+        }
+
+        button {
+            height: 30px;
+            width: 154px;
+            border: none;
+        }
+
+        .escolha:hover {
+            background-color: rgb(88, 194, 255);
+        }
+
+        .escolha {
+            background-color: rgb(78, 123, 247);
+            color: white;
+            cursor: pointer;
+            height: 50px;
+            width: 50px;
+            transition: 0.5s;
+            border-radius: 50%;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            height: 20px;
+            background-color: rgb(221, 221, 221);
+            color: #ffffff;
+            border-radius: 6px;
+            text-align: center;
+            position: absolute;
+            z-index: 1;
+            top: 22%;
+            right: 10px;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .none {
+            display: none;
+        }
+
+        .con {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .calc {
+            background-color: rgb(249, 252, 83);
+            padding: 15px;
+            width: 150px;
+            height: 50px;
+            border-radius: 15px;
+        }
+
+        .add {
+            background-color: rgb(87, 87, 255);
+            color: white;
+            width: 150px;
+            height: 50px;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="con">
+        <h2>Controle de Estoque</h2>
+        <button onclick="abrirModalItem()" class="escolha"><img src="icons8-selection-64.png" alt="" srcset=""></button>
+    </div>
+
+    <h3>Lista de Itens:</h3>
+    <table id="tabelaItens">
+        <tr>
+            <th>Número</th>
+            <th>Item</th>
+            <th>Tipo</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Quantidade</th>
+            <th>Preço</th>
+            <th>Preço Total</th>
+            <th>Ações</th>
+        </tr>
+    </table>
+
+    <div id="modalItem" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModalItem()">&times;</span>
+            <h2>Adicionar Item</h2>
+            <label for="itemInput">Equipamento:</label>
+            <input type="text" id="itemInput">
+            <label for="tipoInput">Tipo:</label>
+            <input type="text" id="tipoInput">
+            <label for="marcaInput">Marca:</label>
+            <input type="text" id="marcaInput">
+            <label for="modeloInput">Modelo:</label>
+            <input type="text" id="modeloInput"><br>
+            <label for="quantidadeInput">Quantidade:</label>
+            <input type="number" id="quantidadeInput" min="1" value="1">
+            <label for="precoInput">Preço:</label>
+            <input type="number" id="precoInput" min="0">
+            <label for="precoTotalInput">Preço Total:</label>
+            <input type="number" id="precoTotalInput" min="0" readonly><br>
+            <button onclick="calcularPrecoTotal()" class="calc">Calcular</button>
+            <button onclick="adicionarItem()" class="add">Adicionar</button>
+        </div>
+    </div>
+
+    <script>
+        var numeroItem = 1;
+        var modalItem = document.getElementById("modalItem");
+
+        // Função para obter os dados armazenados no localStorage
+        function getDadosArmazenados() {
+            var items = localStorage.getItem("controleEstoqueItems");
+            if (items) {
+                items = JSON.parse(items);
+                numeroItem = items.length + 1;
+                for (var i = 0; i < items.length; i++) {
+                    adicionarItemTabela(items[i]);
+                }
+            }
+        }
+
+        // Função para salvar os dados no localStorage
+        function salvarDados() {
+            var tabela = document.getElementById("tabelaItens");
+            var rows = tabela.rows;
+            var items = [];
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                var item = {
+                    numero: row.cells[0].innerHTML,
+                    nome: row.cells[1].innerHTML,
+                    tipo: row.cells[2].innerHTML,
+                    marca: row.cells[3].innerHTML,
+                    modelo: row.cells[4].innerHTML,
+                    quantidade: row.cells[5].innerHTML,
+                    preco: row.cells[6].innerHTML,
+                    precoTotal: row.cells[7].innerHTML
+                };
+                items.push(item);
+            }
+            localStorage.setItem("controleEstoqueItems", JSON.stringify(items));
+        }
+
+        // Função para adicionar um item à tabela
+        function adicionarItemTabela(item) {
+            var tabela = document.getElementById("tabelaItens");
+            var row = tabela.insertRow(-1);
+            row.insertCell(0).innerHTML = item.numero;
+            row.insertCell(1).innerHTML = item.nome;
+            row.insertCell(2).innerHTML = item.tipo;
+            row.insertCell(3).innerHTML = item.marca;
+            row.insertCell(4).innerHTML = item.modelo;
+            row.insertCell(5).innerHTML = item.quantidade;
+            row.insertCell(6).innerHTML = item.preco;
+            row.insertCell(7).innerHTML = item.precoTotal;
+            row.insertCell(8).innerHTML = '<button onclick="removerItem(this)">Remover</button>';
+        }
+
+        function abrirModalItem() {
+            modalItem.style.display = "block";
+        }
+
+        function fecharModalItem() {
+            modalItem.style.display = "none";
+        }
+
+        function calcularPrecoTotal() {
+            var quantidade = parseInt(document.getElementById("quantidadeInput").value);
+            var preco = parseFloat(document.getElementById("precoInput").value);
+            var precoTotal = quantidade * preco;
+            document.getElementById("precoTotalInput").value = precoTotal.toFixed(2);
+        }
+
+        function adicionarItem() {
+            var item = document.getElementById("itemInput").value.trim();
+            var tipo = document.getElementById("tipoInput").value.trim();
+            var marca = document.getElementById("marcaInput").value.trim();
+            var modelo = document.getElementById("modeloInput").value.trim();
+            var quantidade = parseInt(document.getElementById("quantidadeInput").value);
+            var preco = parseFloat(document.getElementById("precoInput").value);
+            var precoTotal = parseFloat(document.getElementById("precoTotalInput").value);
+
+            if (item === "" || tipo === "" || marca === "" || modelo === "" || isNaN(quantidade) || isNaN(preco) || isNaN(precoTotal)) {
+                alert("Preencha todos os campos corretamente.");
+                return;
+            }
+
+            var itemObj = {
+                numero: numeroItem,
+                nome: item,
+                tipo: tipo,
+                marca: marca,
+                modelo: modelo,
+                quantidade: quantidade,
+                preco: preco.toFixed(2),
+                precoTotal: precoTotal.toFixed(2)
+            };
+
+            adicionarItemTabela(itemObj);
+            numeroItem++;
+            fecharModalItem();
+            limparCampos();
+            salvarDados();
+        }
+
+        function removerItem(button) {
+            var row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            salvarDados();
+        }
+
+        function limparCampos() {
+            document.getElementById("itemInput").value = "";
+            document.getElementById("tipoInput").value = "";
+            document.getElementById("marcaInput").value = "";
+            document.getElementById("modeloInput").value = "";
+            document.getElementById("quantidadeInput").value = "1";
+            document.getElementById("precoInput").value = "";
+            document.getElementById("precoTotalInput").value = "";
+        }
+
+        // Carregar os dados armazenados no localStorage ao carregar a página
+        window.onload = function () {
+            getDadosArmazenados();
+        };
+    </script>
+</body>
+
+</html>
