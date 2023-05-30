@@ -7,6 +7,8 @@
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
+            background-color: rgb(37, 37, 37);
+            color: rgb(255, 255, 255);
         }
 
         table {
@@ -16,7 +18,7 @@
 
         th,
         td {
-            border: 1px solid #ddd;
+            border: 1px solid #61e6db;
             padding: 8px;
             text-align: left;
         }
@@ -31,7 +33,7 @@
             height: 100%;
             overflow: auto;
             flex-direction: column;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgb(46, 46, 46);
         }
 
         input {
@@ -44,7 +46,7 @@
         }
 
         .modal-content {
-            background-color: #fefefe;
+            background-color: #14141431;
             margin: 5% auto;
             padding: 20px;
             height: 550px;
@@ -227,8 +229,8 @@
     </div>
 
 
-    <input type="text" onclick="buscarItem()" id="buscaInput" placeholder="Digite um termo de busca" class="input"style="margin: 0;width: 250px;">
-  
+    <input type="text" id="buscaInput" placeholder="Digite um termo de busca" class="input"style="margin: 0;width: 250px;">
+    <button onclick="buscarItem()" class="search" style="width: 50px;position: relative;background-color:blue;border-radius: 50%;width: 40px;"><i class="fas fa-search"></i></button>
     
     <div id="mensagemBusca" style="display: none;">Nenhum item encontrado.</div>
     <h3>Lista de Itens:</h3>
@@ -268,8 +270,8 @@
             <input type="number" id="precoTotalInput" min="0" readonly><br>
             <label for="estadoInput">Estado:</label>
             <select id="estadoInput">
-                <option value="novo">Novo</option> 
                 <option value="usado">Usado</option>
+                <option value="nao-usado">Não usado</option>
             </select>
             <button onclick="calcularPrecoTotal()" class="calc">Calcular</button>
             <button onclick="adicionarItem()" class="add">Adicionar</button>
