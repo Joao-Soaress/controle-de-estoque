@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    <title>Controle de Estoque</title>
+    <title>Controle de Estoque</title>   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Resto do seu código -->
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -95,7 +96,7 @@
             width: 50px;
             transition: 0.5s;
             border-radius: 50%;
-            font-size:30px;
+            font-size: 30px;
         }
 
         .tooltip {
@@ -136,7 +137,7 @@
         }
 
         .calc {
-            background-color: rgb(249, 252, 83);
+            background-color: rgb(95, 155, 233);
             padding: 15px;
             width: 150px;
             height: 50px;
@@ -150,28 +151,100 @@
             height: 50px;
             border-radius: 15px;
         }
+
+        .num {
+            width: 10px;
+        }
+
+        .actions {
+            width: 250px;
+        }
+
+        button {
+            width: 120px;
+            background-color: #598cebb6;
+            color: white;
+            cursor: pointer;
+        }
+
+        .date {
+            width: 150px;
+        }
+
+        th {
+            width: auto;
+        }
+        .input{
+            outline: invert;
+            border-radius: 15px;
+            height: 20px;
+        }
     </style>
+    <script>function buscarItem() {
+            var termoBusca = document.getElementById("buscaInput").value.toLowerCase();
+            var tabela = document.getElementById("tabelaItens");
+            var rows = tabela.rows;
+            var mensagemBusca = document.getElementById("mensagemBusca");
+
+            var encontrouItem = false;
+
+            for (var i = 1; i < rows.length; i++) {
+                var nome = rows[i].cells[1].innerText.toLowerCase();
+                var tipo = rows[i].cells[2].innerText.toLowerCase();
+                var marca = rows[i].cells[3].innerText.toLowerCase();
+                var modelo = rows[i].cells[4].innerText.toLowerCase();
+                var estado = rows[i].cells[8].innerText.toLowerCase();
+
+                if (
+                    nome.includes(termoBusca) ||
+                    tipo.includes(termoBusca) ||
+                    marca.includes(termoBusca) ||
+                    modelo.includes(termoBusca) ||
+                    estado.includes(termoBusca)
+                ) {
+                    rows[i].style.display = "";
+                    encontrouItem = true;
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+
+            if (encontrouItem) {
+                mensagemBusca.style.display = "none";
+            } else {
+                mensagemBusca.style.display = "block";
+            }
+        }
+    </script>
 </head>
 
 <body>
-
     <div class="con">
         <h2>Controle de Estoque</h2>
+
+
         <button onclick="abrirModalItem()" class="escolha">+</button>
     </div>
 
+
+    <input type="text" id="buscaInput" placeholder="Digite um termo de busca" class="input"style="margin: 0;width: 250px;">
+    <button onclick="buscarItem()" class="search" style="width: 50px;position: relative;background-color:blue;border-radius: 50%;width: 40px;"><i class="fas fa-search"></i></button>
+    
+    <div id="mensagemBusca" style="display: none;">Nenhum item encontrado.</div>
     <h3>Lista de Itens:</h3>
     <table id="tabelaItens">
         <tr>
-            <th>Número</th>
-            <th>Item</th>
+            <th class="num"></th>
+            <th class="item">Item</th>
             <th>Tipo</th>
             <th>Marca</th>
             <th>Modelo</th>
-            <th>Quantidade</th>
+            <th class="quan">Quantidade</th>
             <th>Preço</th>
             <th>Preço Total</th>
-            <th>Ações</th>
+            <th>Estado</th>
+            <th class="date">Dia Do Lançamento</th>
+            <th class="actions">Ações</th>
         </tr>
     </table>
 
@@ -193,6 +266,11 @@
             <input type="number" id="precoInput" min="0">
             <label for="precoTotalInput">Preço Total:</label>
             <input type="number" id="precoTotalInput" min="0" readonly><br>
+            <label for="estadoInput">Estado:</label>
+            <select id="estadoInput">
+                <option value="usado">Usado</option>
+                <option value="nao-usado">Não usado</option>
+            </select>
             <button onclick="calcularPrecoTotal()" class="calc">Calcular</button>
             <button onclick="adicionarItem()" class="add">Adicionar</button>
         </div>
@@ -220,16 +298,17 @@
             var rows = tabela.rows;
             var items = [];
             for (var i = 1; i < rows.length; i++) {
-                var row = rows[i];
                 var item = {
-                    numero: row.cells[0].innerHTML,
-                    nome: row.cells[1].innerHTML,
-                    tipo: row.cells[2].innerHTML,
-                    marca: row.cells[3].innerHTML,
-                    modelo: row.cells[4].innerHTML,
-                    quantidade: row.cells[5].innerHTML,
-                    preco: row.cells[6].innerHTML,
-                    precoTotal: row.cells[7].innerHTML
+                    numero: rows[i].cells[0].innerText,
+                    nome: rows[i].cells[1].innerText,
+                    tipo: rows[i].cells[2].innerText,
+                    marca: rows[i].cells[3].innerText,
+                    modelo: rows[i].cells[4].innerText,
+                    quantidade: rows[i].cells[5].innerText,
+                    preco: rows[i].cells[6].innerText,
+                    precoTotal: rows[i].cells[7].innerText,
+                    estado: rows[i].cells[8].innerText,
+                    dataLancamento: rows[i].cells[9].innerText
                 };
                 items.push(item);
             }
@@ -239,86 +318,180 @@
         // Função para adicionar um item à tabela
         function adicionarItemTabela(item) {
             var tabela = document.getElementById("tabelaItens");
-            var row = tabela.insertRow(-1);
-            row.insertCell(0).innerHTML = item.numero;
-            row.insertCell(1).innerHTML = item.nome;
-            row.insertCell(2).innerHTML = item.tipo;
-            row.insertCell(3).innerHTML = item.marca;
-            row.insertCell(4).innerHTML = item.modelo;
-            row.insertCell(5).innerHTML = item.quantidade;
-            row.insertCell(6).innerHTML = item.preco;
-            row.insertCell(7).innerHTML = item.precoTotal;
-            row.insertCell(8).innerHTML = '<button onclick="removerItem(this)">Remover</button>';
+            var row = tabela.insertRow();
+
+            var numeroCell = row.insertCell(0);
+            numeroCell.innerHTML = item.numero;
+
+            var nomeCell = row.insertCell(1);
+            nomeCell.innerHTML = item.nome;
+
+            var tipoCell = row.insertCell(2);
+            tipoCell.innerHTML = item.tipo;
+
+            var marcaCell = row.insertCell(3);
+            marcaCell.innerHTML = item.marca;
+
+            var modeloCell = row.insertCell(4);
+            modeloCell.innerHTML = item.modelo;
+
+            var quantidadeCell = row.insertCell(5);
+            quantidadeCell.innerHTML = item.quantidade;
+
+            var precoCell = row.insertCell(6);
+            precoCell.innerHTML = item.preco;
+
+            var precoTotalCell = row.insertCell(7);
+            precoTotalCell.innerHTML = item.precoTotal;
+
+            var estadoCell = row.insertCell(8);
+            estadoCell.innerHTML = item.estado;
+
+            var dataLancamentoCell = row.insertCell(9);
+            dataLancamentoCell.innerHTML = item.dataLancamento;
+
+            var acoesCell = row.insertCell(10);
+            acoesCell.innerHTML = '<button onclick="editarItem(this)">Editar</button> <button onclick="removerItem(this)">Remover</button>';
         }
 
+        // Função para abrir o modal de adicionar item
         function abrirModalItem() {
-            modalItem.style.display = "block";
+            modalItem.style.display = "flex";
         }
 
+        // Função para fechar o modal de adicionar item
         function fecharModalItem() {
             modalItem.style.display = "none";
         }
 
+        // Função para calcular o preço total
         function calcularPrecoTotal() {
-            var quantidade = parseInt(document.getElementById("quantidadeInput").value);
-            var preco = parseFloat(document.getElementById("precoInput").value);
-            var precoTotal = quantidade * preco;
-            document.getElementById("precoTotalInput").value = precoTotal.toFixed(2);
+            var preco = document.getElementById("precoInput").value;
+            var quantidade = document.getElementById("quantidadeInput").value;
+            var precoTotal = parseFloat(preco) * parseInt(quantidade);
+            if (!isNaN(precoTotal)) {
+                document.getElementById("precoTotalInput").value = precoTotal.toFixed(2);
+            }
         }
 
+        // Função para adicionar um novo item
         function adicionarItem() {
-            var item = document.getElementById("itemInput").value.trim();
-            var tipo = document.getElementById("tipoInput").value.trim();
-            var marca = document.getElementById("marcaInput").value.trim();
-            var modelo = document.getElementById("modeloInput").value.trim();
-            var quantidade = parseInt(document.getElementById("quantidadeInput").value);
-            var preco = parseFloat(document.getElementById("precoInput").value);
-            var precoTotal = parseFloat(document.getElementById("precoTotalInput").value);
+            var itemInput = document.getElementById("itemInput").value;
+            var tipoInput = document.getElementById("tipoInput").value;
+            var marcaInput = document.getElementById("marcaInput").value;
+            var modeloInput = document.getElementById("modeloInput").value;
+            var quantidadeInput = document.getElementById("quantidadeInput").value;
+            var precoInput = document.getElementById("precoInput").value;
+            var precoTotalInput = document.getElementById("precoTotalInput").value;
+            var estadoInput = document.getElementById("estadoInput").value;
+            var dataLancamento = new Date().toLocaleDateString();
 
-            if (item === "" || tipo === "" || marca === "" || modelo === "" || isNaN(quantidade) || isNaN(preco) || isNaN(precoTotal)) {
-                alert("Preencha todos os campos corretamente.");
-                return;
-            }
-
-            var itemObj = {
+            var item = {
                 numero: numeroItem,
-                nome: item,
-                tipo: tipo,
-                marca: marca,
-                modelo: modelo,
-                quantidade: quantidade,
-                preco: preco.toFixed(2),
-                precoTotal: precoTotal.toFixed(2)
+                nome: itemInput,
+                tipo: tipoInput,
+                marca: marcaInput,
+                modelo: modeloInput,
+                quantidade: quantidadeInput,
+                preco: precoInput,
+                precoTotal: precoTotalInput,
+                estado: estadoInput,
+                dataLancamento: dataLancamento
             };
 
-            adicionarItemTabela(itemObj);
+            adicionarItemTabela(item);
             numeroItem++;
             fecharModalItem();
-            limparCampos();
             salvarDados();
         }
 
+        // Função para editar um item
+        function editarItem(button) {
+            var row = button.parentNode.parentNode;
+            var numeroCell = row.cells[0];
+            var nomeCell = row.cells[1];
+            var tipoCell = row.cells[2];
+            var marcaCell = row.cells[3];
+            var modeloCell = row.cells[4];
+            var quantidadeCell = row.cells[5];
+            var precoCell = row.cells[6];
+            var precoTotalCell = row.cells[7];
+            var estadoCell = row.cells[8];
+            var dataLancamentoCell = row.cells[9];
+
+            var itemInput = document.getElementById("itemInput");
+            var tipoInput = document.getElementById("tipoInput");
+            var marcaInput = document.getElementById("marcaInput");
+            var modeloInput = document.getElementById("modeloInput");
+            var quantidadeInput = document.getElementById("quantidadeInput");
+            var precoInput = document.getElementById("precoInput");
+            var precoTotalInput = document.getElementById("precoTotalInput");
+            var estadoInput = document.getElementById("estadoInput");
+
+            itemInput.value = nomeCell.innerText;
+            tipoInput.value = tipoCell.innerText;
+            marcaInput.value = marcaCell.innerText;
+            modeloInput.value = modeloCell.innerText;
+            quantidadeInput.value = quantidadeCell.innerText;
+            precoInput.value = precoCell.innerText;
+            precoTotalInput.value = precoTotalCell.innerText;
+            estadoInput.value = estadoCell.innerText;
+
+            modalItem.style.display = "flex";
+
+            // Atualizar os valores ao calcular novamente o preço total
+            calcularPrecoTotal();
+
+            // Remover a linha da tabela ao salvar as alterações
+            var salvarButton = document.getElementsByClassName("add")[0];
+            salvarButton.onclick = function () {
+                nomeCell.innerText = itemInput.value;
+                tipoCell.innerText = tipoInput.value;
+                marcaCell.innerText = marcaInput.value;
+                modeloCell.innerText = modeloInput.value;
+                quantidadeCell.innerText = quantidadeInput.value;
+                precoCell.innerText = precoInput.value;
+                precoTotalCell.innerText = precoTotalInput.value;
+                estadoCell.innerText = estadoInput.value;
+                dataLancamentoCell.innerText = new Date().toLocaleDateString();
+
+                fecharModalItem();
+                salvarDados();
+            };
+        }
+
+        // Função para remover um item
         function removerItem(button) {
             var row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
+            row.remove();
             salvarDados();
         }
 
-        function limparCampos() {
-            document.getElementById("itemInput").value = "";
-            document.getElementById("tipoInput").value = "";
-            document.getElementById("marcaInput").value = "";
-            document.getElementById("modeloInput").value = "";
-            document.getElementById("quantidadeInput").value = "1";
-            document.getElementById("precoInput").value = "";
-            document.getElementById("precoTotalInput").value = "";
+        getDadosArmazenados(); function buscarItem() {
+            var termoBusca = document.getElementById("buscaInput").value.toLowerCase();
+            var tabela = document.getElementById("tabelaItens");
+            var rows = tabela.rows;
+
+            for (var i = 1; i < rows.length; i++) {
+                var nome = rows[i].cells[1].innerText.toLowerCase();
+                var tipo = rows[i].cells[2].innerText.toLowerCase();
+                var marca = rows[i].cells[3].innerText.toLowerCase();
+                var modelo = rows[i].cells[4].innerText.toLowerCase();
+                var estado = rows[i].cells[8].innerText.toLowerCase();
+
+                if (
+                    nome.includes(termoBusca) ||
+                    tipo.includes(termoBusca) ||
+                    marca.includes(termoBusca) ||
+                    modelo.includes(termoBusca) ||
+                    estado.includes(termoBusca)
+                ) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
         }
 
-        // Carregar os dados armazenados no localStorage ao carregar a página
-        window.onload = function () {
-            getDadosArmazenados();
-        };
     </script>
 </body>
-
-</html>
